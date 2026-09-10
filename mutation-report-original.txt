@@ -1,0 +1,141 @@
+[job-id] 5be110e5ae0741eaa4549434cdfcd585
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_Add 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 0fa3a29c5ab647efa89b7c4d7962ea9e
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_Mul 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] cbd839d790ed4990b401926a4de3b6eb
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_Div 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] d854c77df54e4bffb0eb2955138daa44
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_FloorDiv 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] fb5e0d2760d2406dabb21e1b55ffc304
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_Mod 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 72247ac577ce46448ce777173ae9a220
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_Pow 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 99db0d19786f41c394317506a452576b
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_RShift 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] c4652de7bcd24cddaa6ab8e79a98962f
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_LShift 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 1cf1b9add0474d9fb163a5c9fecedcca
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_BitOr 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] b12652a3206944f3bf97cb89c076d5ec
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_BitAnd 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] e3e85c8dea4843dc87216e5e440ecb2f
+src/payments_svc/refunds.py core/ReplaceBinaryOperator_Sub_BitXor 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 6a2590acebf14da2a06a03e147a0814c
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_NotEq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 3bd852c2f1414dcaa0a9b140e229e6cd
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_Lt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 466e2dcb21f34c8b9f8c922b58db5f9b
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_LtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] 1d525761f5e04caab92b5f539d7f131b
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_Gt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 2595b5da81084e62847bec7a8f5ec4aa
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_GtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 7caba99529e445e3ba219631c9fe3133
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_Is 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 3483adbd60f942fb863434128021d08e
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Eq_IsNot 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 249255c90457499a832fbaf4fd0c95d8
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_Eq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 689f9531dfee4203b0943dbee3781d58
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_NotEq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] b4757c43051c4838841351f12614707e
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_LtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 31e0909f8fa740938508d37f5652c3e1
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_Gt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] d8c5c3f47ab14f32b3959744986bc580
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_GtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 1dcc0aaeabe547e9b190124f77ce1b84
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_Is 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] f68dbfaf36334bac9bb77f3a712e44b2
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Lt_IsNot 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 6894d216cc7f46218b40311299ee3831
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_Eq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] 672fda9a64be4e00b9737a204fb0c717
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_NotEq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 910785fac92940c4806900e31d3b99c5
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_Lt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 7d1ad4d1d502457faa892966ec0d3ae9
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_Gt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] e62d74bd19b74c7d88abcc30e5b5d8c1
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_GtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 3820cf2abf9f483db9f09747764a5a38
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_Is 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] a0c54a0b37594b5e8868e1aeec4be0e2
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_LtE_IsNot 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 9f1751ed996141f8b42df1ebf7fe93b3
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_Eq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] d13851c78b634127b8266e2b0f77b77c
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_NotEq 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] b0415f711503444f89aedb87b1edfe4f
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_Lt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] de67c07de67e47b98b37ce0a04bf3c93
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_LtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] 50b99b7058f84a98bccaa30d78b20a7e
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_Gt 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 738b78c2ae9c48b2b39793272b4d1973
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_GtE 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] f2fd8e190ac04cdea57512c2f06be9b3
+src/payments_svc/refunds.py core/ReplaceComparisonOperator_Is_IsNot 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 94e2154046dc47a8be9b5cb1d43d87af
+src/payments_svc/refunds.py core/AddNot 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 472846e451ae40ceaee36b73fa417308
+src/payments_svc/refunds.py core/AddNot 1
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] c13e182ff6654cc39c1cf6dc3e4bb258
+src/payments_svc/refunds.py core/AddNot 2
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] be5023a636594f798fbba07b335c845e
+src/payments_svc/refunds.py core/AddNot 3
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+[job-id] 4d378ade816849b4946495defa5056fa
+src/payments_svc/refunds.py core/ReplaceTrueWithFalse 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] 88782cfd49ae4941b2e666566035b70f
+src/payments_svc/refunds.py core/ReplaceOrWithAnd 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.SURVIVED
+[job-id] e6d95a7cd0eb40f1a54475cd33aee5d8
+src/payments_svc/refunds.py core/RemoveDecorator 0
+worker outcome: WorkerOutcome.NORMAL, test outcome: TestOutcome.KILLED
+total jobs: 46
+complete: 46 (100.00%)
+surviving mutants: 8 (17.39%)
