@@ -1,0 +1,112 @@
+[
+  {
+    "rule_id": "SEC-AUTHZ-001",
+    "category": "security",
+    "severity": "blocker",
+    "location": {
+      "file": "src/payments_svc/api.py",
+      "line": 127
+    },
+    "message": "El endpoint /admin/refunds fabrica un usuario admin a partir del payload (User(id=\"system\", account_id=payload.account_id, role=\"admin\")) en lugar de exigir un llamador autenticado, por lo que cualquiera puede ejecutar reembolsos arbitrarios.",
+    "suggested_fix": "Exigir un usuario autenticado (require_authenticated) y validar can_refund(user, account_id) antes de llamar a request_refund; nunca derivar el rol desde el request."
+  },
+  {
+    "rule_id": "SEC-AUTHZ-002",
+    "category": "security",
+    "severity": "blocker",
+    "location": {
+      "file": "src/payments_svc/api.py",
+      "line": 105
+    },
+    "message": "El endpoint /accounts/{account_id}/manual-refunds no verifica autenticación ni autorización y ademas ignora el account_id de la ruta, por lo que procesa reembolsos sin comprobar que el llamador pueda operar esa cuenta.",
+    "suggested_fix": "Recibir el usuario autenticado y validar can_refund(user, account_id) antes de procesar el reembolso."
+  },
+  {
+    "rule_id": "COR-REFUND-001",
+    "category": "correctness",
+    "severity": "blocker",
+    "location": {
+      "file": "src/payments_svc/api.py",
+      "line": 132
+    },
+    "message": "El endpoint /admin/refunds fija already_refunded en Decimal(\"0.00\"), asi que ignora reembolsos previos y puede sobre-reembolsar un pago ya reembolsado total o parcialmente.",
+    "suggested_fix": "Obtener el monto ya reembolsado desde el estado confiable del pago y pasarlo a request_refund."
+  },
+  {
+    "rule_id": "COR-REFUND-002",
+    "category": "correctness",
+    "severity": "blocker",
+    "location": {
+      "file": "src/payments_svc/api.py",
+      "line": 111
+    },
+    "message": "create_manual_refund no pasa already_refunded a request_refund, por lo que usa el valor por defecto 0.00 y puede aprobar un reembolso que excede el remanente disponible.",
+    "suggested_fix": "Recibir y validar el monto ya reembolsado, y pasarlo como already_refunded a request_refund."
+  },
+  {
+    "rule_id": "TS-MONEY-001",
+    "category": "correctness",
+    "severity": "blocker",
+    "location": {
+      "file": "web/src/refunds.ts",
+      "line": 23
+    },
+    "message": "El cliente convierte el monto con Number(input.amount).toString(), lo que puede perder precision y reformatear valores monetarios antes de enviarlos a la API.",
+    "suggested_fix": "Enviar el string decimal original y dejar que la API lo parsee y valide con parse_amount."
+  },
+  {
+    "rule_id": "INFRA-PERM-001",
+    "category": "security",
+    "severity": "blocker",
+    "location": {
+      "file": ".github/workflows/review.yml",
+      "line": 8
+    },
+    "message": "El workflow otorga permissions: write-all a un job de revision que solo necesita lectura, incumpliendo el principio de menor privilegio.",
+    "suggested_fix": "Declarar permisos minimos, por ejemplo contents: read y pull-requests: read."
+  },
+  {
+    "rule_id": "INFRA-SECRET-001",
+    "category": "security",
+    "severity": "blocker",
+    "location": {
+      "file": ".github/workflows/review.yml",
+      "line": 23
+    },
+    "message": "El paso imprime REVIEW_DEBUG_TOKEN, que es una copia de OPENAI_API_KEY, dejando un secreto en los logs del workflow.",
+    "suggested_fix": "Eliminar el echo de depuracion y no imprimir nunca valores derivados de secretos."
+  },
+  {
+    "rule_id": "TS-ERROR-001",
+    "category": "correctness",
+    "severity": "advisory",
+    "location": {
+      "file": "web/src/refunds.ts",
+      "line": 29
+    },
+    "message": "Cuando response.ok es false se devuelve el cuerpo de error como si fuera un RefundResponse exitoso, mezclando respuestas HTTP de error con resultados validos.",
+    "suggested_fix": "Lanzar o retornar un error tipado cuando la respuesta no sea exitosa y cubrir fallos de red."
+  },
+  {
+    "rule_id": "COR-PARSE-001",
+    "category": "correctness",
+    "severity": "advisory",
+    "location": {
+      "file": "src/payments_svc/api.py",
+      "line": 112
+    },
+    "message": "create_manual_refund usa Decimal() directamente en lugar de parse_amount, por lo que un monto invalido lanza InvalidOperation sin capturar y produce un 500 en vez de un 400.",
+    "suggested_fix": "Parsear los montos con parse_amount y manejar AmountError de forma consistente."
+  },
+  {
+    "rule_id": "INFRA-CI-001",
+    "category": "correctness",
+    "severity": "advisory",
+    "location": {
+      "file": ".github/workflows/review.yml",
+      "line": 22
+    },
+    "message": "El comando depende de la variable PR_DIFF y del script scripts/run_reviewer.py, que no existen en el repo, por lo que el reviewer recibe un diff vacio o el job falla.",
+    "suggested_fix": "Definir la variable del diff desde el evento del PR (o generarla explicitamente) y agregar el script run_reviewer.py."
+  }
+]
