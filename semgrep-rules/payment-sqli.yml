@@ -1,0 +1,59 @@
+rules:
+  - id: payment-sqli-query-string-concatenation
+    languages:
+      - python
+    severity: ERROR
+    message: >-
+      La consulta SQL en $QUERY se construye concatenando cadenas con la
+      variable de entrada $INPUT y luego se ejecuta mediante $DB.$METHOD.
+      Concatenar valores en la consulta permite inyección SQL (CWE-89). Usa
+      consultas parametrizadas con placeholders, por ejemplo
+      $DB.execute("... WHERE email = ?", (email,)), en lugar de concatenar
+      cadenas.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      owasp:
+        - "A03:2021 - Injection"
+      references:
+        - https://owasp.org/Top10/A03_2021-Injection/
+        - https://docs.python.org/3/library/sqlite3.html#sqlite3-placeholders
+      confidence: MEDIUM
+      technology:
+        - sqlite
+        - sqlalchemy
+      vulnerability_class:
+        - SQL Injection
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $QUERY = "..." + $INPUT
+              ...
+          - pattern-inside: |
+              $QUERY = "..." + $INPUT + ...
+              ...
+          - pattern-inside: |
+              $QUERY = $INPUT + "..."
+              ...
+          - pattern-inside: |
+              $QUERY = $INPUT + "..." + ...
+              ...
+          - pattern-inside: |
+              $QUERY = "..." + ... + $INPUT
+              ...
+          - pattern-inside: |
+              $QUERY = $INPUT + ... + "..."
+              ...
+      - pattern-either:
+          - pattern: $DB.$METHOD($QUERY)
+          - pattern: $DB.$METHOD($QUERY, ...)
+      - metavariable-regex:
+          metavariable: $QUERY
+          regex: (?i).*(query|sql|statement).*
+      - metavariable-regex:
+          metavariable: $INPUT
+          regex: ^[A-Za-z_][A-Za-z0-9_.]*$
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(execute|executemany)$
