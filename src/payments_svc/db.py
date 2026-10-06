@@ -18,9 +18,9 @@ def find_customer_by_email(
     query = (
         "SELECT id, email, status "
         "FROM customers "
-        "WHERE email = '" + email + "'"
+        "WHERE email = ?"
     )
-    row = connection.execute(query).fetchone()
+    row = connection.execute(query, (email,)).fetchone()
     if row is None:
         return None
     return CustomerRecord(id=row[0], email=row[1], status=row[2])

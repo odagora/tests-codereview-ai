@@ -77,8 +77,8 @@
       "payload": "o'brien@example.com",
       "target": "find_customer_by_email",
       "objetivo": "Email con apostrofe que puede ser legitimo (apellidos con comilla) y no es un intento de ataque.",
-      "expectativa_segura": "Es un formato de email plausible con una comilla literal; una implementacion segura con parametros deberia poder buscarlo sin romperse (puede devolver el cliente si existe, o None si no existe, pero sin excepcion de sintaxis).",
-      "razon_de_riesgo": "Con concatenacion de strings esta entrada legitima tambien rompe la consulta (error de sintaxis), mostrando que la falla no es solo explotable sino que ademas rompe casos de uso reales: el problema no es unicamente de seguridad sino tambien de correctud."
+      "expectativa_segura": "Es un formato de email plausible con una comilla literal; con la consulta parametrizada (fix aplicado) se busca sin romperse y devuelve el cliente si existe.",
+      "razon_de_riesgo": "Con concatenacion de strings (estado anterior al fix) esta entrada legitima tambien rompia la consulta (error de sintaxis), mostrando que la falla no era solo explotable sino que ademas rompia casos de uso reales. Tras parametrizar, el apostrofe se trata como parte del valor."
     },
     {
       "id": "sqli-sentencias-apiladas",
@@ -122,8 +122,8 @@
       "payload": "a\u0000b",
       "target": "find_customer_by_email",
       "objetivo": "Byte NUL embebido en el email.",
-      "expectativa_segura": "Debe devolver None o fallar con un error de validacion de dominio controlado; no debe exponer una excepcion cruda del driver como comportamiento esperado.",
-      "razon_de_riesgo": "Los bytes NUL se usan historicamente para truncar cadenas en C y evadir validaciones (null-byte injection); hoy el driver sqlite3 lanza ProgrammingError, lo que confirma que el valor llega sin sanitizar hasta la capa de base de datos."
+      "expectativa_segura": "Debe devolver None sin lanzar una excepcion cruda del driver.",
+      "razon_de_riesgo": "Los bytes NUL se usan historicamente para truncar cadenas en C y evadir validaciones (null-byte injection). Antes del fix, el driver sqlite3 lanzaba ProgrammingError porque el valor llegaba sin sanitizar al texto del SQL concatenado; con la consulta parametrizada el NUL viaja como valor de parametro."
     },
     {
       "id": "borde-string-largo-1000",

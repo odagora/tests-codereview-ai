@@ -1,16 +1,20 @@
 """Tests adversariales anclados a OWASP A03:2021-Injection.
 
 Cubren la superficie real de busqueda de clientes en payments_svc.db:
-- find_customer_by_email: concatena el email en el SQL (hallazgo de Semgrep).
+- find_customer_by_email: usaba concatenacion de strings (hallazgo de
+  Semgrep); ya corregido para usar una consulta parametrizada
+  (placeholder '?'), igual que find_active_customers_by_country.
 - find_active_customers_by_country: ruta parametrizada, usada como control.
 - count_customers_for_status: concatena pero con allowlist previa; se usa
   solo como comparacion adicional, no como endpoint.
 
 Estos payloads estan documentados con objetivo, expectativa segura y razon
 de riesgo en samples/security/adversarial-payload.json. Las expectativas
-aqui reflejan el comportamiento SEGURO deseado, no lo que el codigo actual
-hace: mientras la SQLi de find_customer_by_email siga abierta, los tests de
-tautologia marcados como evidencia de riesgo deben FALLAR a proposito.
+aqui reflejan el comportamiento SEGURO: con el fix aplicado, todos los
+tests de esta suite deben pasar. Los tests de tautologia/union que antes
+fallaban como evidencia del riesgo (y los de apostrofe/NUL byte que antes
+documentaban las roturas colaterales de la concatenacion) ahora son tests
+de regresion para el fix.
 """
 
 from __future__ import annotations
@@ -21,6 +25,7 @@ import unittest
 from pathlib import Path
 
 from payments_svc.db import (
+    CustomerRecord,
     count_customers_for_status,
     find_active_customers_by_country,
     find_customer_by_email,
@@ -186,35 +191,37 @@ class TestFindCustomerByEmailEntradasMalformadas(unittest.TestCase):
     def test_apostrofe_en_email_legitimo_no_rompe_con_excepcion_cruda(self) -> None:
         """`o'brien@example.com` es un formato de email plausible.
 
-        No es un ataque, pero con concatenacion de strings tambien rompe la
-        consulta. Documentamos el comportamiento observado (excepcion de
-        sintaxis SQL) como evidencia de que el problema no es solo de
-        seguridad sino tambien de correctud funcional; no lo aceptamos como
-        comportamiento deseado.
+        Tras corregir find_customer_by_email para usar una consulta
+        parametrizada (placeholder '?'), este email legitimo con apostrofe
+        ya no rompe la consulta: la base de datos trata el apostrofe como
+        parte del valor, no como sintaxis SQL. Antes del fix, este mismo
+        caso lanzaba sqlite3.OperationalError (ver historial); ese
+        comportamiento quedo documentado como evidencia del bug y ahora
+        sirve como test de regresion: el cliente real debe encontrarse.
         """
         entry = _payload_by_id("sqli-apostrofe-nombre-legitimo")
 
-        with self.assertRaises(
-            sqlite3.OperationalError,
-            msg=(
-                "se esperaba que la concatenacion actual rompa con un email "
-                "legitimo que contiene un apostrofe; si esto ya no lanza "
-                "OperationalError, revisa si la funcion fue corregida para "
-                "usar parametros y actualiza este test en consecuencia"
-            ),
-        ):
-            find_customer_by_email(self.connection, entry["payload"])
+        result = find_customer_by_email(self.connection, entry["payload"])
+
+        self.assertEqual(
+            result,
+            CustomerRecord(id="cus_5", email="o'brien@example.com", status="active"),
+        )
 
     def test_byte_nul_no_debe_propagar_excepcion_cruda_del_driver(self) -> None:
-        """NUL embebido: documenta el comportamiento observado hoy.
+        """NUL embebido: test de regresion tras el fix.
 
-        No es un resultado deseable (deberia validarse antes de llegar al
-        driver), pero se deja como evidencia explicita en vez de ocultarlo.
+        Antes del fix, este mismo caso lanzaba sqlite3.ProgrammingError
+        porque el NUL llegaba sin sanitizar al texto del SQL concatenado.
+        Con la consulta parametrizada, el NUL viaja como valor de parametro
+        y no como sintaxis SQL: ningun cliente tiene ese email, por lo que
+        la funcion debe devolver None sin lanzar ninguna excepcion.
         """
         entry = _payload_by_id("borde-nul-byte")
 
-        with self.assertRaises(sqlite3.ProgrammingError):
-            find_customer_by_email(self.connection, entry["payload"])
+        result = find_customer_by_email(self.connection, entry["payload"])
+
+        self.assertIsNone(result)
 
 
 class TestFindCustomerByEmailValoresDeFrontera(unittest.TestCase):
