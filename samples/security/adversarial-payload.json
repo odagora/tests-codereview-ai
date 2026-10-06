@@ -1,0 +1,185 @@
+{
+  "contexto": {
+    "superficie": "Busqueda de clientes por email expuesta como funcion, no como endpoint HTTP.",
+    "owasp": "A03:2021-Injection",
+    "funcion_vulnerable": "find_customer_by_email (src/payments_svc/db.py) - concatena el email en el SQL.",
+    "funcion_control_segura": "find_active_customers_by_country (src/payments_svc/db.py) - usa placeholders '?'.",
+    "funcion_secundaria": "count_customers_for_status (src/payments_svc/db.py) - concatena pero con allowlist previa de status; se usa solo como comparacion, no como endpoint.",
+    "nota": "No existen endpoints de busqueda de clientes en el repo; los casos aqui apuntan a las funciones de db.py."
+  },
+  "payloads": [
+    {
+      "id": "sqli-tautologia-comilla-simple",
+      "familia": "sql_injection",
+      "payload": "' OR '1'='1",
+      "target": "find_customer_by_email",
+      "objetivo": "Cerrar el literal de email y anadir una condicion siempre verdadera.",
+      "expectativa_segura": "No es un email valido; la busqueda debe devolver None (ningun cliente).",
+      "razon_de_riesgo": "Si el WHERE se vuelve tautologico, la consulta coincide con todas las filas y devuelve el primer cliente de la tabla sin conocer su email real: bypass total del filtro de busqueda."
+    },
+    {
+      "id": "sqli-tautologia-comentario",
+      "familia": "sql_injection",
+      "payload": "' OR 1=1 --",
+      "target": "find_customer_by_email",
+      "objetivo": "Tautologia numerica con comentario SQL para neutralizar la comilla de cierre que anade el codigo.",
+      "expectativa_segura": "No es un email valido; debe devolver None.",
+      "razon_de_riesgo": "Variante que evade filtros ingenuos basados en buscar el texto exacto \"1=1\"; confirma que el atacante controla la sintaxis del WHERE completo."
+    },
+    {
+      "id": "sqli-prefijo-email-real-truncado",
+      "familia": "sql_injection",
+      "payload": "alice@example.com'--",
+      "target": "find_customer_by_email",
+      "objetivo": "Anteponer un email valido y truncar el resto de la clausula con un comentario.",
+      "expectativa_segura": "La cadena completa no es un email valido (tiene comillas y comentario); debe devolver None.",
+      "razon_de_riesgo": "Si la comilla y el comentario rompen la igualdad exacta, la consulta equivale a WHERE email = 'alice@example.com' y devuelve el registro real aunque la entrada no sea un email valido: la igualdad deja de validar la entrada."
+    },
+    {
+      "id": "sqli-condicion-sobre-otra-columna",
+      "familia": "sql_injection",
+      "payload": "' OR status='blocked",
+      "target": "find_customer_by_email",
+      "objetivo": "Inyectar una condicion sobre la columna status en lugar de email.",
+      "expectativa_segura": "No es un email valido; debe devolver None.",
+      "razon_de_riesgo": "Permite pivotar la busqueda por atributos distintos al email (por ejemplo, listar o enumerar clientes bloqueados), filtrando datos que la funcion no deberia exponer por esta via."
+    },
+    {
+      "id": "sqli-union-select-otra-fila",
+      "familia": "sql_injection",
+      "payload": "' UNION SELECT id, email, status FROM customers WHERE status='blocked' --",
+      "target": "find_customer_by_email",
+      "objetivo": "UNION con el mismo numero de columnas para forzar que la consulta devuelva una fila elegida por el atacante.",
+      "expectativa_segura": "No es un email valido; debe devolver None.",
+      "razon_de_riesgo": "Si el motor acepta el UNION, el atacante decide exactamente que fila de la tabla customers se devuelve, sin conocer ningun email: exfiltracion dirigida de registros."
+    },
+    {
+      "id": "sqli-union-metadatos-esquema",
+      "familia": "sql_injection",
+      "payload": "' UNION SELECT 'x','y',name FROM sqlite_master --",
+      "target": "find_customer_by_email",
+      "objetivo": "UNION contra una tabla de metadatos del motor para comprobar hasta donde llega la inyeccion.",
+      "expectativa_segura": "No es un email valido; debe devolver None.",
+      "razon_de_riesgo": "Si la consulta llega a ejecutarse, el atacante puede leer el esquema de la base (nombres de tablas/indices), ampliando el reconocimiento mas alla de la tabla customers."
+    },
+    {
+      "id": "sqli-comilla-simple-malformada",
+      "familia": "entrada_malformada",
+      "payload": "'",
+      "target": "find_customer_by_email",
+      "objetivo": "Una sola comilla para romper la sintaxis SQL sin intentar un payload completo.",
+      "expectativa_segura": "No es un email valido. Un manejo seguro no deberia depender de que el motor lance una excepcion de sintaxis; idealmente se rechaza antes de tocar la base o se escapa correctamente.",
+      "razon_de_riesgo": "Hoy produce un error de sintaxis SQL (sqlite3.OperationalError) en vez de un resultado de dominio (None o ValueError de validacion): la funcion esta filtrando detalles internos del motor de base de datos ante una entrada invalida."
+    },
+    {
+      "id": "sqli-apostrofe-nombre-legitimo",
+      "familia": "entrada_malformada",
+      "payload": "o'brien@example.com",
+      "target": "find_customer_by_email",
+      "objetivo": "Email con apostrofe que puede ser legitimo (apellidos con comilla) y no es un intento de ataque.",
+      "expectativa_segura": "Es un formato de email plausible con una comilla literal; una implementacion segura con parametros deberia poder buscarlo sin romperse (puede devolver el cliente si existe, o None si no existe, pero sin excepcion de sintaxis).",
+      "razon_de_riesgo": "Con concatenacion de strings esta entrada legitima tambien rompe la consulta (error de sintaxis), mostrando que la falla no es solo explotable sino que ademas rompe casos de uso reales: el problema no es unicamente de seguridad sino tambien de correctud."
+    },
+    {
+      "id": "sqli-sentencias-apiladas",
+      "familia": "sql_injection",
+      "payload": "'; DROP TABLE customers; --",
+      "target": "find_customer_by_email",
+      "objetivo": "Comprobar si el driver permite ejecutar una segunda sentencia (DDL destructivo) apilada tras la original.",
+      "expectativa_segura": "No es un email valido y, bajo ninguna circunstancia, debe alterar el esquema o los datos de la tabla customers.",
+      "razon_de_riesgo": "Si el driver permitiera multiples statements, este payload borraria la tabla completa (perdida de datos). El test verifica que, tras intentarlo, la tabla customers sigue intacta (no valida que la inyeccion sea imposible en otros drivers que si acepten sentencias apiladas)."
+    },
+    {
+      "id": "borde-email-vacio",
+      "familia": "entrada_malformada",
+      "payload": "",
+      "target": "find_customer_by_email",
+      "objetivo": "String vacio como email.",
+      "expectativa_segura": "Debe devolver None; no existe ningun cliente con email vacio.",
+      "razon_de_riesgo": "No es un vector de inyeccion, pero verifica que el camino de entrada mas trivial no produzca falsos positivos ni excepciones inesperadas."
+    },
+    {
+      "id": "borde-email-solo-espacios",
+      "familia": "entrada_malformada",
+      "payload": "   ",
+      "target": "find_customer_by_email",
+      "objetivo": "String compuesto unicamente por espacios.",
+      "expectativa_segura": "Debe devolver None.",
+      "razon_de_riesgo": "Confirma que la funcion no normaliza (trim) de forma que un valor sin contenido util coincida accidentalmente con algun registro."
+    },
+    {
+      "id": "borde-caracteres-control",
+      "familia": "entrada_malformada",
+      "payload": "\u0001\u0007\u001b[31m",
+      "target": "find_customer_by_email",
+      "objetivo": "Caracteres de control no imprimibles (incluida una secuencia de escape ANSI) dentro del email.",
+      "expectativa_segura": "Debe devolver None sin lanzar excepciones no controladas ni reflejar la secuencia en ningun log/consola de forma peligrosa.",
+      "razon_de_riesgo": "Entradas con bytes de control pueden provocar comportamientos inesperados en logging o terminales (log/ANSI injection) ademas de en el propio SQL."
+    },
+    {
+      "id": "borde-nul-byte",
+      "familia": "entrada_malformada",
+      "payload": "a\u0000b",
+      "target": "find_customer_by_email",
+      "objetivo": "Byte NUL embebido en el email.",
+      "expectativa_segura": "Debe devolver None o fallar con un error de validacion de dominio controlado; no debe exponer una excepcion cruda del driver como comportamiento esperado.",
+      "razon_de_riesgo": "Los bytes NUL se usan historicamente para truncar cadenas en C y evadir validaciones (null-byte injection); hoy el driver sqlite3 lanza ProgrammingError, lo que confirma que el valor llega sin sanitizar hasta la capa de base de datos."
+    },
+    {
+      "id": "borde-string-largo-1000",
+      "familia": "valor_de_frontera",
+      "payload_len": 1000,
+      "payload_pattern": "'a' * 1000",
+      "target": "find_customer_by_email",
+      "objetivo": "Email de 1000 caracteres repetidos, sin estructura de ataque.",
+      "expectativa_segura": "Debe devolver None sin degradar el rendimiento de forma anormal.",
+      "razon_de_riesgo": "Verifica ausencia de limites de tamano antes de tocar la base: sin validacion de longitud, cualquier string arbitrariamente largo llega intacto a la consulta."
+    },
+    {
+      "id": "borde-string-largo-100000",
+      "familia": "valor_de_frontera",
+      "payload_len": 100000,
+      "payload_pattern": "'a' * 100000",
+      "target": "find_customer_by_email",
+      "objetivo": "Email de 100.000 caracteres para explorar el limite practico de tamano.",
+      "expectativa_segura": "Debe devolver None sin error ni demoras excesivas.",
+      "razon_de_riesgo": "La ausencia de un limite de longitud en la capa de entrada es una condicion previa que facilita abusos de recursos (consultas o payloads de inyeccion muy largos) ademas de la inyeccion misma."
+    },
+    {
+      "id": "control-ruta-parametrizada-tautologia",
+      "familia": "comparacion_control_seguro",
+      "payload": "' OR '1'='1",
+      "target": "find_active_customers_by_country",
+      "objetivo": "Mismo payload de tautologia SQL contra la ruta parametrizada (placeholders '?') para contrastar comportamiento.",
+      "expectativa_segura": "Debe devolver una lista vacia: el motor trata el payload como un valor literal de 'country', no como SQL.",
+      "razon_de_riesgo": "No es un vector de riesgo en si (es el caso de control). Sirve como evidencia de que la parametrizacion neutraliza exactamente el payload que compromete a find_customer_by_email: mismo input, resultado seguro."
+    },
+    {
+      "id": "control-ruta-parametrizada-comilla-simple",
+      "familia": "comparacion_control_seguro",
+      "payload": "'",
+      "target": "find_active_customers_by_country",
+      "objetivo": "Comilla simple suelta contra la ruta parametrizada.",
+      "expectativa_segura": "Debe devolver una lista vacia, sin excepcion de sintaxis SQL.",
+      "razon_de_riesgo": "Caso de control: demuestra que, a diferencia de find_customer_by_email, la version parametrizada ni siquiera rompe la sintaxis ante una comilla."
+    },
+    {
+      "id": "xss-seed-script-tag",
+      "familia": "xss_seed_fuzzing",
+      "payload": "\"><script>alert(1)</script>",
+      "target": "find_customer_by_email",
+      "objetivo": "Semilla clasica de XSS reflejado, usada aqui como fuzzing de robustez de entrada (el repo no renderiza HTML con este valor).",
+      "expectativa_segura": "Debe devolver None; el valor no es un email valido y no hay superficie de renderizado HTML en este repo para XSS real.",
+      "razon_de_riesgo": "No hay sumidero HTML en el codigo actual, por lo que no se reporta como XSS explotable; se incluye como semilla de fuzzing para detectar manejo fragil de caracteres especiales (<, >, \", /) si en el futuro el valor se reutiliza en una respuesta HTTP o en un log HTML."
+    },
+    {
+      "id": "fuzzing-seed-comillas-mixtas",
+      "familia": "xss_seed_fuzzing",
+      "payload": "'\"<>;--",
+      "target": "find_customer_by_email",
+      "objetivo": "Semilla corta con los metacaracteres mas comunes en inyeccion SQL/HTML combinados, pensada como punto de partida para un fuzzer.",
+      "expectativa_segura": "Debe devolver None sin excepcion no controlada.",
+      "razon_de_riesgo": "Concentra en pocos bytes los caracteres que distintos sumideros (SQL, HTML, shell) tratan de forma especial; util como semilla inicial de un fuzzer dirigido a esta funcion."
+    }
+  ]
+}
